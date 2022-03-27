@@ -20,7 +20,20 @@ class StixelLoss(Loss):
     def call(self, target, predict):
         """
         predict -> (h, w, num_bins)
-        target -> (h, w, 2)
+        target -> (h, w, 2) e.g. shape: (1, 240, 2)
+        h(1): is the dimension in this case for the stixel_pos, could be 2 for e.g. stixel_dist
+        w(240): is the amount of elements (here: img width) and contains 2 values
+            2:  first is if Data (stixel) is available 0=No, 1=Yes
+                second is the bin val (e.g. from 0[top] to 160[bottom]
+        """
+        """
+        Depth could look like: target -> (2, 240, 2)
+        First Layer is Stixel_Pos
+        Second Layer is Stixel_Dist
+            [...] 2:first is if Data (stixel) is available 0=No, 1=Yes
+                    second is the bin val (e.g. from 0[close] to 160[far]
+                - if the dist is more than a specified value it is not available (=0)
+                - the distance must be specified dependent on the used lens (hard generalization)
         """
 
         have_target, stixel_pos = tf.split(target, 2, axis=-1)

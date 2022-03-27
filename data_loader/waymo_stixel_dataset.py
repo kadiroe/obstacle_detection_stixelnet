@@ -200,6 +200,7 @@ class WaymoStixelDataset(Sequence):
         return visualize_stixel(img, stixel_pos)
 
     def get_target(self, idx):
+        #returns Ground Truth
         return self._generate_label_image(idx)
 
     def get_stixel_pos(self, idx):

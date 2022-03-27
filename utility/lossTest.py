@@ -15,7 +15,8 @@ def main():
     loss_func = StixelLoss()
     # Ground Truth Data
     img, target = loss_set.__getitem__(0)
-    # print(target)
+    print(target)
+    print(target.shape)
     # NN prediction
     predict = tf.random.uniform((1, 240, 160), minval=-300.51, maxval=300.49)
 
