@@ -20,10 +20,8 @@ from the Waymo Open Dataset. A training/val and testing set can be provided on d
 - [Scalability in Perception for Autonomous Driving: Waymo Open Dataset](https://arxiv.org/pdf/1912.04838)
 ![Sample](./docs/images/sample_ground_truth.jpg)
 
-## StixelNet Model ##
-***
-
- t.b.d.
+## Adapted StixelNet Model ##
+![Model](./docs/images/network_waymo.png)
 
 ## Training ##
 After downloading the dataset, run
@@ -33,8 +31,6 @@ After downloading the dataset, run
 model weights will be saved into ./saved_models directory
 
 ## Test one image ##
-***
-
 - Download pretrained model weights with
 ```bash
     t.b.d.
@@ -46,8 +42,6 @@ model weights will be saved into ./saved_models directory
 ```
 
 ## Sample Result ##
-***
-
 ![Sample Result](./docs/images/sample_result.png)
 
 ## References ##
