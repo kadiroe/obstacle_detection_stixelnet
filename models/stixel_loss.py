@@ -9,7 +9,7 @@ import keras.backend as K
 
 class StixelLoss(Loss):
     def __init__(
-        self, num_bins=160, alpha=1.0, epsilon=0.0001, label_size=(240, 160)
+        self, num_bins=320, alpha=1.0, epsilon=0.0001, label_size=(240, 160)
     ):
         super(StixelLoss, self).__init__(name="stixel_loss")
         self._num_bins = num_bins
@@ -18,16 +18,17 @@ class StixelLoss(Loss):
         self._label_size = label_size
 
     def call(self, target, predict):
+        print(target.shape)
         """
         predict -> (h, w, num_bins)
-        target -> (h, w, 2) e.g. shape: (1, 240, 2)
+        target -> (h, w, 2) e.g. shape: (1, 240, 3)
         h(1): is the dimension in this case for the stixel_pos, could be 2 for e.g. stixel_dist
         w(240): is the amount of elements (here: img width) and contains 2 values
             2:  first is if Data (stixel) is available 0=No, 1=Yes
                 second is the bin val (e.g. from 0[top] to 160[bottom]
         """
         """
-        Depth could look like: target -> (2, 240, 2)
+        Depth could look like: target -> (1, 240, 2)
         First Layer is Stixel_Pos
         Second Layer is Stixel_Dist
             [...] 2:first is if Data (stixel) is available 0=No, 1=Yes
@@ -36,7 +37,7 @@ class StixelLoss(Loss):
                 - the distance must be specified dependent on the used lens (hard generalization)
         """
 
-        have_target, stixel_pos = tf.split(target, 2, axis=-1)
+        have_target, stixel_pos, stixel_depth = tf.split(target, 3, axis=-1)
         stixel_pos = stixel_pos - 0.5
         stixel_pos = ((stixel_pos - tf.math.floor(stixel_pos)) + tf.math.floor(stixel_pos) + self._epsilon)
 
@@ -51,7 +52,22 @@ class StixelLoss(Loss):
             batch_dims=-1,
         )
 
-        p = fp * (tf.math.ceil(stixel_pos) - stixel_pos) + cp * (stixel_pos - tf.math.floor(stixel_pos))
+        stixel_depth = stixel_depth - 0.5
+        stixel_depth = ((stixel_depth - tf.math.floor(stixel_depth)) + tf.math.floor(stixel_depth) + self._epsilon)
+
+        fpd = tf.gather(
+            predict,
+            K.cast(tf.math.floor(stixel_depth), dtype="int32"),
+            batch_dims=-1,
+        )
+        cpd = tf.gather(
+            predict,
+            K.cast(tf.math.ceil(stixel_depth), dtype="int32"),
+            batch_dims=-1,
+        )
+
+        p = fp * (tf.math.ceil(stixel_pos) - stixel_pos) + cp * (stixel_pos - tf.math.floor(stixel_pos)) + \
+            fpd * (tf.math.ceil(stixel_depth) - stixel_depth) + cpd * (stixel_depth - tf.math.floor(stixel_depth))
 
         loss = -K.log(p) * have_target
         loss = K.sum(loss) / K.sum(have_target)

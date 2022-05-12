@@ -31,7 +31,7 @@ class WaymoStixelDataset(Sequence):
         ground_truth_path,
         # phase="train",
         batch_size=1,
-        label_size=(240, 160),
+        label_size=(240, 320),
         shuffle=True,
         transform=None,
         random_seed=2019,
@@ -72,6 +72,7 @@ class WaymoStixelDataset(Sequence):
                 "path": line[0],
                 "x": int(line[1]),
                 "y": int(line[2]),
+                "d": int(line[3]),
             }
             # Do stuff above if the phase (train or val) fits else ignore it
             for line in lines
@@ -84,11 +85,11 @@ class WaymoStixelDataset(Sequence):
             # if path already exist: append stixel data - one image, multiple stixels- otherwise...
             if cur_base_image_path in self._image_dict.keys():
                 self._image_dict[cur_base_image_path].append(
-                    [line["x"], line["y"]]
+                    [line["x"], line["y"], line["d"]]
                 )
             else:
                 # ... add a new dict entry
-                self._image_dict[cur_base_image_path] = [[line["x"], line["y"]]]
+                self._image_dict[cur_base_image_path] = [[line["x"], line["y"], line["d"]]]
 
         # list of all image paths
         self._image_paths = list(self._image_dict.keys())
@@ -155,31 +156,38 @@ class WaymoStixelDataset(Sequence):
         height, width = img.shape[:2]
 
         # Normalized
+        max_depth = 160.0
         positions[:, 0] = positions[:, 0] / width
         positions[:, 1] = positions[:, 1] / height
+        positions[:, 2] = positions[:, 2] / max_depth
 
         colnum, binnum = self._label_size
         have_gt = np.zeros((colnum), dtype=np.int)
-        gt = np.zeros((colnum), dtype=np.float32)
-
+        gt_y = np.zeros((colnum), dtype=np.float32)
+        gt_d = np.zeros((colnum), dtype=np.float32)
 
         for point in positions:
             col_idx = int(point[0] * colnum)
-            row_idx = point[1] * binnum
+            row_idx = point[1] * binnum/2
+            depth_idx = point[2] * binnum/2
 
             if have_gt[col_idx] == 1:
-                gt[col_idx] = (gt[col_idx] + row_idx) / 2
+                gt_y[col_idx] = (gt_y[col_idx] + row_idx) / 2
+                gt_d[col_idx] = (gt_d[col_idx] + depth_idx) / 2
             else:
-                gt[col_idx] = row_idx
+                gt_y[col_idx] = row_idx
+                gt_d[col_idx] = depth_idx
                 have_gt[col_idx] = 1
+
 
         # ???
         # https://numpy.org/doc/stable/reference/generated/numpy.clip.html
         # @stixel_loss stixel_pos = stixel_pos - 0.5
         # 0.1- 48.99 (0.51, 49.49)
-        gt = np.clip(gt, 0.51, 159.49)
+        gt_y = np.clip(gt_y, 0.51, 159.49)
+        gt_d = np.clip(gt_d, 0.51, 159.49)
 
-        return np.stack((have_gt, gt), axis=1)
+        return np.stack((have_gt, gt_y, gt_d), axis=1)
 
     def on_epoch_end(self):
         if self._shuffle:
