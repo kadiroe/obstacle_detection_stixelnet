@@ -22,7 +22,7 @@ parser.add_argument("--model_path", required=True)
 parsed_args = parser.parse_args()
 
 
-def test_single_image(model, img, label_size=(240, 160)):
+def test_single_image(model, img, target, idx, label_size=(240, 160)):
     assert img is not None
 
     h, w, c = img.shape
@@ -33,6 +33,10 @@ def test_single_image(model, img, label_size=(240, 160)):
     aug_img = aug_img[np.newaxis, :]
     predict = model.predict(aug_img, batch_size=1)
     predict = K.reshape(predict, label_size)
+    """Save prediction"""
+    np.savetxt('predict_' + str(idx) + ".txt", predict.numpy())
+    """Save target"""
+    np.savetxt('target_' + str(idx) + ".txt", np.squeeze(target))
     predict = K.eval(K.argmax(predict, axis=-1))
 
     for x, py in enumerate(predict):
@@ -62,22 +66,15 @@ def main(args):
     )
 
     indices = (
-        80,
-        112,
-        278,
-        300,
-        460,
-        511,
-        666,
-        801,
-        900
-    )
-    for i, idx in tqdm.tqdm(enumerate(indices)):
-        img, _ = val_set[idx]
-        img = img[0]
+        80, 42, 333, 404)
 
-        result = test_single_image(model, img)
-        cv2.imwrite("result{}.png".format(i), result)
+    for i, idx in tqdm.tqdm(enumerate(indices)):
+        img, target = val_set[idx]
+        img = img[0]
+        # full analysis
+        cv2.imwrite("image_{}.png".format(idx), img)
+        result = test_single_image(model, img, target, idx)
+        cv2.imwrite("result_{}.png".format(idx), result)
 
 
 if __name__ == "__main__":
