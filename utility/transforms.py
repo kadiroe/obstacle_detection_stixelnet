@@ -7,7 +7,8 @@ class HorizontalFlip(object):
         self._p = p
 
     def __call__(self, image, target):
-        assert target.ndim == 2 and target.shape[1] == 2
+        print(target.shape)
+        assert target.ndim == 2 and target.shape[1] == 3
 
         import numpy as np
 

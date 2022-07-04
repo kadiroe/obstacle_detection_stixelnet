@@ -14,7 +14,7 @@ class Config(object):
         # Stixel ground truth from the following third party dataset:
         # https://sites.google.com/view/danlevi/datasets
         self.GROUND_TRUTH_PATH = os.path.join(
-            self.DATA_PATH, "StixelsGroundTruth.txt"
+            self.DATA_PATH, "big_waymo_train_depth.txt"
         )
 
         self.SAVED_MODELS_PATH = "saved_models"

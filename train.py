@@ -57,10 +57,11 @@ def main():
         ]
     )
 
+    test= os.path.join(dt_config.DATA_PATH, "big_waymo_train_depth.txt")
     val_aug = Compose([Normalize(p=1.0)])
     train_set = WaymoStixelDataset(
         data_path=dt_config.DATA_PATH,
-        ground_truth_path=os.path.join(dt_config.DATA_PATH, "waymo_train.txt"),
+        ground_truth_path=os.path.join(dt_config.DATA_PATH, "big_waymo_train_depth.txt"),
         batch_size=parsed_args.batch_size,
         transform=train_aug,
         customized_transform=utility.HorizontalFlip(p=0.5),
@@ -68,7 +69,7 @@ def main():
 
     val_set = WaymoStixelDataset(
         data_path=dt_config.DATA_PATH,
-        ground_truth_path=os.path.join(dt_config.DATA_PATH, "waymo_val.txt"),
+        ground_truth_path=os.path.join(dt_config.DATA_PATH, "big_waymo_val_depth.txt"),
         transform=val_aug,
     )
 

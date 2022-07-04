@@ -63,6 +63,7 @@ class WaymoStixelDataset(Sequence):
         ]
         assert len(lines) > 0
         lines = [line.split(" ") for line in lines]
+       
 
         # assert phase in ("train", "val")
         # phase_dict = {"train": "Train", "val": "Test"}
