@@ -57,7 +57,7 @@ def main():
         ]
     )
 
-    test= os.path.join(dt_config.DATA_PATH, "big_waymo_train_depth.txt")
+    #test= os.path.join(dt_config.DATA_PATH, "big_waymo_train_depth.txt")
     val_aug = Compose([Normalize(p=1.0)])
     train_set = WaymoStixelDataset(
         data_path=dt_config.DATA_PATH,

@@ -46,7 +46,7 @@ class WaymoStixelDataset(Sequence):
         assert os.path.isdir(data_path)
         assert os.path.isfile(ground_truth_path)
 
-        self._data_path = os.path.join(data_path, "waymo_stixel_images")
+        self._data_path = data_path
         self._ground_truth_path = ground_truth_path
         self._batch_size = batch_size
         self._label_size = label_size
