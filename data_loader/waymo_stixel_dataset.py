@@ -3,25 +3,8 @@
 import os
 import cv2
 import numpy as np
-from keras.utils.data_utils import Sequence
+from tensorflow.keras.utils import Sequence
 
-
-def visualize_stixel(
-        image,
-    stixel_pos,
-    stixel_width=5,
-    stixel_height=100,
-    color=(0, 255, 0),
-):
-    result = np.copy(image)
-    [
-        cv2.rectangle(
-            result, (x, y - stixel_height), (x + stixel_width, y), color
-        )
-        for (x, y) in stixel_pos
-    ]
-
-    return result
 
 
 class WaymoStixelDataset(Sequence):
@@ -193,20 +176,6 @@ class WaymoStixelDataset(Sequence):
     def on_epoch_end(self):
         if self._shuffle:
             np.random.shuffle(self._indexes)
-
-    def visualize_one_image(self, idx):
-        img = cv2.imread(
-            os.path.join(
-                self._data_path, self._image_paths[idx * self._batch_size]
-            )
-        )
-
-        if self._transform:
-            img = self._transform(image=img)["image"]
-
-        stixel_pos = self._stixels_pos[idx * self._batch_size]
-
-        return visualize_stixel(img, stixel_pos)
 
     def get_target(self, idx):
         #returns Ground Truth

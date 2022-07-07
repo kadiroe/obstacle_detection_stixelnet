@@ -3,13 +3,13 @@
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
-from keras.losses import Loss
-import keras.backend as K
+from tensorflow.keras.losses import Loss
+import tensorflow.keras.backend as K
 
 
 class StixelLoss(Loss):
     def __init__(
-        self, num_bins=320, alpha=1.0, epsilon=0.0001, label_size=(240, 160)
+        self, num_bins=320, alpha=1.0, epsilon=0.0001, label_size=(240, 320)
     ):
         super(StixelLoss, self).__init__(name="stixel_loss")
         self._num_bins = num_bins
@@ -69,8 +69,19 @@ class StixelLoss(Loss):
         p = fp * (tf.math.ceil(stixel_pos) - stixel_pos) + cp * (stixel_pos - tf.math.floor(stixel_pos)) + \
             fpd * (tf.math.ceil(stixel_depth) - stixel_depth) + cpd * (stixel_depth - tf.math.floor(stixel_depth))
 
-        loss = -K.log(p) * have_target
-        loss = K.sum(loss) / K.sum(have_target)
+        loss = -K.log(p + tf.keras.backend.epsilon()) * have_target
+        loss = K.sum(loss) / (K.sum(have_target) + tf.keras.backend.epsilon())
+
+        if tf.math.is_nan(tf.reduce_sum(loss)):
+            tf.print(loss)
+            tf.print("Loss is NAN")
+            tf.print(target)
+            tf.print(predict)
+            tf.print(fp)
+            tf.print(cp)
+            tf.print(p)
+            tf.print(have_target)
+            tf.print(self)
 
         return loss * self._alpha
 
